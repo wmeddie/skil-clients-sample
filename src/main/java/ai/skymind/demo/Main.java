@@ -4,17 +4,19 @@ import ai.skymind.ApiClient;
 import ai.skymind.ApiException;
 import ai.skymind.Configuration;
 import ai.skymind.skil.DefaultApi;
-import ai.skymind.skil.model.INDArray;
 import ai.skymind.skil.model.LoginRequest;
 import ai.skymind.skil.model.LoginResponse;
 import ai.skymind.skil.model.MultiPredictResponse;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.serde.base64.Nd4jBase64;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.UUID;
 
 public class Main {
 
-    public static void main(String[] args) throws ApiException {
+    public static void main(String[] args) throws ApiException, IOException {
         String imagePath = args[0];
         File imageFile = new File(imagePath);
 
@@ -47,10 +49,10 @@ public class Main {
         );
 
         assert(multiPredictResponse.getOutputs().size() == 2);
-        INDArray indArray1 = multiPredictResponse.getOutputs().get(0);
-        INDArray indArray2 = multiPredictResponse.getOutputs().get(1);
+        INDArray array1 = Nd4jBase64.fromBase64(multiPredictResponse.getOutputs().get(0).getArray());
+        INDArray array2 = Nd4jBase64.fromBase64(multiPredictResponse.getOutputs().get(1).getArray());
 
-        System.out.println(indArray1.getData().toString());
-        System.out.println(indArray2.getData().toString());
+        System.out.println(array1.toString());
+        System.out.println(array2.toString());
     }
 }
