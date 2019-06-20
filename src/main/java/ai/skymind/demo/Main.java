@@ -11,7 +11,6 @@ import ai.skymind.skil.model.MultiPredictResponse;
 import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.serde.base64.Nd4jBase64;
-import sun.jvm.hotspot.utilities.ProcImageClassLoader;
 
 import java.io.File;
 import java.io.IOException;
