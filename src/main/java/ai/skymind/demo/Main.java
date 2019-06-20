@@ -41,10 +41,9 @@ public class Main {
         defaultClient.setApiKey(token);
         defaultClient.setApiKeyPrefix("Bearer");
 
-        NativeImageLoader imageLoader = new NativeImageLoader(608, 608);
+        NativeImageLoader imageLoader = new NativeImageLoader(64, 64, 3);
         INDArray imageMatrix = imageLoader.asMatrix(imageFile);
-        imageMatrix.permutei(0, 3, 1, 2);
-
+        imageMatrix = imageMatrix.reshape(1, 64, 64, 3).permute(0, 3, 1, 2);
 
         MultiPredictRequest request = new MultiPredictRequest()
                 .addInputsItem(toSKILNDArray(imageMatrix))
