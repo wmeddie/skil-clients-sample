@@ -6,9 +6,12 @@ import ai.skymind.Configuration;
 import ai.skymind.skil.DefaultApi;
 import ai.skymind.skil.model.LoginRequest;
 import ai.skymind.skil.model.LoginResponse;
+import ai.skymind.skil.model.MultiPredictRequest;
 import ai.skymind.skil.model.MultiPredictResponse;
+import org.datavec.image.loader.NativeImageLoader;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.serde.base64.Nd4jBase64;
+import sun.jvm.hotspot.utilities.ProcImageClassLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,20 +42,31 @@ public class Main {
         defaultClient.setApiKey(token);
         defaultClient.setApiKeyPrefix("Bearer");
 
-        MultiPredictResponse multiPredictResponse = skil.multipredictimage(
-                imageFile,
-                UUID.randomUUID().toString(),
-                false,
-                "demo",
-                "default",
-                "wideresnet"
-        );
+        NativeImageLoader imageLoader = new NativeImageLoader(608, 608);
+        INDArray imageMatrix = imageLoader.asMatrix(imageFile);
+        imageMatrix.permutei(0, 3, 1, 2);
 
-        assert(multiPredictResponse.getOutputs().size() == 2);
-        INDArray array1 = Nd4jBase64.fromBase64(multiPredictResponse.getOutputs().get(0).getArray());
-        INDArray array2 = Nd4jBase64.fromBase64(multiPredictResponse.getOutputs().get(1).getArray());
+
+        MultiPredictRequest request = new MultiPredictRequest()
+                .addInputsItem(toSKILNDArray(imageMatrix))
+                .id(UUID.randomUUID().toString())
+                .needsPreProcessing(false);
+
+        MultiPredictResponse response = skil.multipredict(request, "demo", "default", "wideresnet");
+
+
+        assert(response.getOutputs().size() == 2);
+        INDArray array1 = Nd4jBase64.fromBase64(response.getOutputs().get(0).getArray());
+        INDArray array2 = Nd4jBase64.fromBase64(response.getOutputs().get(1).getArray());
 
         System.out.println(array1.toString());
         System.out.println(array2.toString());
+    }
+
+    private static ai.skymind.skil.model.INDArray toSKILNDArray(INDArray array) throws IOException {
+        ai.skymind.skil.model.INDArray ret = new ai.skymind.skil.model.INDArray();
+        ret.setArray(Nd4jBase64.base64String(array));
+
+        return ret;
     }
 }
